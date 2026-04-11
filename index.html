@@ -15,17 +15,17 @@
   <img src="logo.png" alt="Logo" class="logo-panaderia">
 
   <label>Fecha</label>
-  <input type="date" id="fecha" >
+  <input type="date" id="fecha" onchange="guardarEnLocal()">
 
   <label>Jornada</label>
-  <select id="jornada">
+  <select id="jornada" onchange="guardarEnLocal()">
     <option value="">-</option>
     <option value="AM">AM</option>
     <option value="PM">PM</option>
   </select>
 
   <label>Responsable</label>
-  <select id="responsable">
+  <select id="responsable" onchange="guardarEnLocal()">
     <option value="">-</option>
     <option value="Eduanggi">Eduanggi</option>
     <option value="Patricia">Patricia</option>
@@ -214,6 +214,7 @@ function agregarGasto() {
   if (gastos.length === 0 || (gastos[gastos.length - 1].proveedor && gastos[gastos.length - 1].concepto && gastos[gastos.length - 1].valor)) {
     gastos.push({ proveedor: "", concepto: "", valor: "" });
     render();
+    guardarEnLocal(); 
   } else {
     alert("Por favor, completa el gasto actual antes de agregar uno nuevo.");
   }  
@@ -222,6 +223,7 @@ function agregarGasto() {
 function agregarRecudo() {
   if (recaudos){
     renderRecudos();
+    guardarEnLocal(); 
   } else {
     alert("Solo puede agregar esos recuados");
   }  
@@ -233,6 +235,7 @@ function agregarRecudo() {
 function limpiarGasto(index) {
   gastos[index] = { proveedor: "", concepto: "", valor: "" };
   render();
+  guardarEnLocal(); 
 }
 
 // 🔹 Formato COP
@@ -246,6 +249,7 @@ function formatearInput(input, index) {
   gastos[index].valor = valor;
   input.value = formatearCOP(valor);
   renderTotal();
+  guardarEnLocal(); 
 }
 
 // 🔹 Total
@@ -291,6 +295,7 @@ function mostrarTodasOpciones(input, index, tipo) {
     div.onclick = () => {
       gastos[index][tipo] = item;
       render();
+      guardarEnLocal(); 
     };
 
     contenedor.appendChild(div);
@@ -320,6 +325,7 @@ function filtrarOpciones(input, index, tipo) {
     div.onclick = () => {
       gastos[index][tipo] = item;
       render();
+      guardarEnLocal(); 
     };
 
     contenedor.appendChild(div);
@@ -387,6 +393,7 @@ function agregarRecudo() {
       moneda: "",
       caja: ""
     });
+    guardarEnLocal(); 
   }
   renderRecudos();
 }
@@ -397,7 +404,8 @@ function actualizarRecaudo(index, campo, valor, input) {
 
   input.value = formatearCOP(limpio);
 
-  renderTotalRecaudos(); // ✔ solo actualiza total
+  renderTotalRecaudos(); //  solo actualiza total
+  guardarEnLocal(); 
 }
 function limpiarRecaudo(index) {
   recaudos[index] = {
@@ -408,6 +416,7 @@ function limpiarRecaudo(index) {
     caja: ""
   };
   renderRecudos();
+  guardarEnLocal(); 
 }
 function calcularTotalRecaudos() {
   return recaudos.reduce((sum, r) => {
