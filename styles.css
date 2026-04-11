@@ -1,0 +1,125 @@
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 10px;
+    }
+    .logo-panaderia {
+      display: block;
+      margin: 0 auto 20px auto;
+      width: 150px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    input, select {
+      width: 90%;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .separador {
+      margin: 20px 0;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .add-btn {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .add-btn-2 {
+      background: #2196F3;
+      color: white;
+    }
+    .add-btn-descarga {
+      background: #e72a2a;
+      color: white;
+    }
+    
+    .delete-btn {
+      background: #ff9800;
+      color: white;
+      margin-top: 5px;
+    }
+
+    .total {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .autocomplete {
+      position: relative;
+    }
+
+    .sugerencias {
+      position: absolute;
+      background: white;
+      width: 100%;
+      
+      max-height: 160px;
+      overflow-y: auto;
+      z-index: 10;
+      border-radius: 8px;
+    }
+
+    .sugerencias div {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .sugerencias div:hover {
+      background: #f0f0f0;
+    }
+    .gasto {
+        border: none; 
+        padding: 12px;
+        border-radius: 12px;
+        margin-top: 12px;
+        background: #fafafa;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+    .recaudos {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .campo-recaudo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .tipo-recaudo {
+        min-width: 90px;
+        font-weight: bold;
+    }

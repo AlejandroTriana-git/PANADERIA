@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gastos Panadería</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+  
+  <img src="logo.png" alt="Logo" class="logo-panaderia">
+
+  <label>Fecha</label>
+  <input type="date" id="fecha" >
+
+  <label>Jornada</label>
+  <select id="jornada">
+    <option value="">-</option>
+    <option value="AM">AM</option>
+    <option value="PM">PM</option>
+  </select>
+
+  <label>Responsable</label>
+  <select id="responsable">
+    <option value="">-</option>
+    <option value="Eduanggi">Eduanggi</option>
+    <option value="Patricia">Patricia</option>
+    <option value="Sra.Natali">Sra.Natali</option>
+  </select>
+
+  <div class="separador">
+    <div id="gastos"></div>
+
+    <button class="add-btn" onclick="agregarGasto()">+ Agregar gasto</button>
+  </div>
+  
+
+  <div class="separador">
+    <div id="recaudos"></div>
+    <button class="add-btn-2" onclick="agregarRecudo()">+ Agregar Recaudo</button>
+
+  </div>
+  
+
+  <div class="total">
+    Total gastos: $<span id="total">0</span>
+  </div>
+  <div class="total">
+    Total recaudos: $<span id="total-recaudos">0</span>
+  </div>
+  
+  <button class="add-btn-descarga" onclick="descargarExcel()">Descargar Excel</button>
+  
+</div>
+
+<script>
+// 🔹 Datos base (EDITA AQUÍ)
+const proveedores = [
+  "ACUEDUCTO DE BOGOTA",
+  "AJ ALIADOS SAS",
+  "AJECOLOMBIA SAS",
+  "ALQUERIA",
+  "ALTIPAL SAS",
+  "AGUDELO DANILO / ARRIENDO",
+  "AUTOLAVADO",
+  "BAVARIA / KOPPS COMERCIAL SAS 900818921",
+  "BIMPACTO",
+  "BRITISH AMERICAN",
+  "CASA LUKER",
+  "CCENECA COMERCIAL SAS / 830507038",
+  "CCENEXPRESS SAS / 900243062",
+  "CHEFRITO",
+  "COCACOLA",
+  "COLANTA",
+  "COMERCIALIZADORA JELBAR SAS",
+  "COMERCIALIZADORA NACIONAL SAS LTDA",
+  "DIANA CORPORACION SAS",
+  "DISTRBUIDORA DE QUESOS DE CARARE",
+  "DISTRIBUCIONES DIMAR",
+  "DISTRIBUCIONES DISAY SAS",
+  "DISTRIBUCIONES PUNTO CLAVE EXPRESS SAS",
+  "DISTRIBUIDORA COLOMBINA LTDA",
+  "DISTRIBUIDORA DE QUESOS DECARLITOS",
+  "DISTRIBUIDORA JELBAR SAS",
+  "DISTRILIDER SAS",
+  "DISTRIMAGIPAN",
+  "DISTRIMARCAS TAR SAS",
+  "DULCITORTAS",
+  "EDUANGGI ANGULO",
+  "EL ANTOJO",
+  "ENEL COLOMBIA",
+  "FLEISCHMANN",
+  "FREDY LAZARO",
+  "FRUVER",
+  "GASEOSAS LUX SAS",
+  "GASNATURAL",
+  "GLORIA COLOMBIA SAS",
+  "HATO GRANDE",
+  "HUEVOS AA - RECIBO",
+  "HUEVOS EXTRA  - RECIBO",
+  "LACTEOS MONTECARLO",
+  "LEVAPAN",
+  "MARIO MARTINEZ",
+  "MERCARNES DEL NORTE",
+  "NISILAC G&G SAS",
+  "PARMALAC",
+  "PATRICIA CONTRERAS",
+  "PRODUCTOS RAMO SAS",
+  "QUALA",
+  "QUESO DEL CAQUETA",
+  "RAFA PIO PIO",
+  "RAFAEL ORTIZ",
+  "RAMIRO VASQUEZ PRADA",
+  "RECIBO",
+  "REMISION MARGARINA / BRAHMAN SAS",
+  "RODEM - DOTACIONES",
+  "RODRIGO CORREA",
+  "SALSAMENTARIA EL CORRAL",
+  "SUPERMERCADOS ARIZA LTDA",
+  "TECNOQUIMICAS SA",
+  "VARIEDADES MI PRIMER LAPICITO",
+  "WILLIAM RAMIREZ",
+  "AVICOLA SAN GABRIEL",
+  "AUTOSERVICIO SABANA",
+  "PAPELERIA Y VARIEDADES",
+  "SABOR SUIZO / INSUMO / FLAMELA -MANTECA",
+  "JAIME VALENCIA / MTTO NEVERA",
+  "DISTRIBUIDORA LA MINA /901358825",
+  "LUNA ROMERO",
+  "MARIA SERRANO",
+  "LIVIMAR CRESPO",
+  "WORLD MIXER / EQUIPOS PARA INDUSTRIA ALMENTICIA",
+  "LUZ DARY VELASQUEZ",
+  "SUPERMARKT MT - 101236595",
+  "CLARO HOGAR",
+  "LA BRASA AL ROJO",
+  "JUAN JOSE DIAZ MANCERA",
+  "SALSAMENTARA LA FONTANA",
+  "COMPAS PLUSS",
+  "CAROLINA NIEVES",
+  "DENNY CORREA",
+  "SUPERTIENDAS 1A SAS",
+  "OMAR SUAREZ",
+  "MARIA RAMIREZ",
+  "HERNANDO BEDOYA",
+  "INTERNET",
+  "KAREN CAMACHO",
+  "SECRETOS DEL TROPICO- RECIBO SIN NIT",
+  "SURTILIDER-800,201,315,-1",
+  "SURTIENDAS -79594083",
+  "DAYANA GONZALEZ",
+  "MAYAGUEZ SA",
+  "DANIEL DIAZ",
+  "COMERCIALIZADORA MAGIPAN - 1024549978",
+  "CONACEITES - COMPAÑÍA NACIONAL DE ACEITES",
+  "KATRONIX",
+  "LA CATLEYA AC SAS",
+  "FREDYLAC",
+  "HUEVITO FELIZ",
+  "YAIRA",
+  "MANUELA",
+  "CARLOS CONTRERAS - MMTO TUBERIA",
+  "UNIVERSALES DELTA",
+  "CAROLINA TERAN",
+  "DIEGO TRILLERAS / VASOS",
+  "UNIMARKA SAS",
+  "SIS SO TIENDA DE SUMINISTRO - 3107934321",
+  "MARGARINA LA DELICIA - SIN NOMBRE",
+  "PLASDEMAR - PLASTICOS Y DESECHABLES",
+  "TORRESCAFE AGUILA ROJA",
+  "COMPASS",
+  "MARIA TORRES",
+  "SUPERPANELA",
+  "CESAR BAEZ LOZANO",
+  "OTROS"
+];
+
+const conceptos = [
+    "1-ALIMENTACIÓN",
+    "2-AREPAS Y EMPANADAS",
+    "3-ASEO Y MANTENIMIENTO",
+    "4-CAFETERIA",
+    "5-DESECHABLES",
+    "6-GASTOS FIJOS",
+    "7-INSUMOS",
+    "8-LECHE",
+    "9-LEGALES",
+    "10-TAMALES",
+    "11-TIENDA",
+    "12-GASTOS DE PERSONAL",
+    "13-VARIOS"
+];
+
+let gastos = [];
+let recaudos = [];
+
+// 🔹 Fecha automática
+function setFechaHoy() {
+  const hoy = new Date().toISOString().split("T")[0];
+  document.getElementById("fecha").value = hoy;
+}
+
+// 🔹 Agregar gasto
+function agregarGasto() {
+  if (gastos.length === 0 || (gastos[gastos.length - 1].proveedor && gastos[gastos.length - 1].concepto && gastos[gastos.length - 1].valor)) {
+    gastos.push({ proveedor: "", concepto: "", valor: "" });
+    render();
+  } else {
+    alert("Por favor, completa el gasto actual antes de agregar uno nuevo.");
+  }  
+  
+}
+function agregarRecudo() {
+  if (recaudos){
+    renderRecudos();
+  } else {
+    alert("Solo puede agregar esos recuados");
+  }  
+  
+  
+}
+
+// 🔹 Limpiar gasto
+function limpiarGasto(index) {
+  gastos[index] = { proveedor: "", concepto: "", valor: "" };
+  render();
+}
+
+// 🔹 Formato COP
+function formatearCOP(valor) {
+  return new Intl.NumberFormat('es-CO').format(valor);
+}
+
+// 🔹 Input moneda
+function formatearInput(input, index) {
+  let valor = input.value.replace(/\D/g, "");
+  gastos[index].valor = valor;
+  input.value = formatearCOP(valor);
+  renderTotal();
+}
+
+// 🔹 Total
+function calcularTotal() {
+  return gastos.reduce((sum, g) => sum + (parseFloat(g.valor) || 0), 0);
+}
+
+function renderTotal() {
+  document.getElementById("total").innerText = formatearCOP(calcularTotal());
+}
+// Cerrar todas las sugerencias
+function cerrarTodasSugerencias() {
+  document.querySelectorAll(".sugerencias").forEach(el => {
+    el.innerHTML = "";
+  });
+}
+
+// Detectar click fuera
+document.addEventListener("click", function(e) {
+  if (!e.target.closest(".autocomplete")) {
+    cerrarTodasSugerencias();
+  }
+});
+//Para evitar recomendaciones encimadas
+function cerrarOtros(indexActual, tipoActual) {
+  document.querySelectorAll(".sugerencias").forEach(el => {
+    if (!el.id.includes(`${tipoActual}-${indexActual}`)) {
+      el.innerHTML = "";
+    }
+  });
+}
+
+function mostrarTodasOpciones(input, index, tipo) {
+  cerrarOtros(index, tipo);
+  const lista = tipo === "proveedor" ? proveedores : conceptos;
+  const contenedor = document.getElementById(`sug-${tipo}-${index}`);
+  contenedor.innerHTML = "";
+
+  lista.forEach(item => {
+    const div = document.createElement("div");
+    div.innerText = item;
+
+    div.onclick = () => {
+      gastos[index][tipo] = item;
+      render();
+    };
+
+    contenedor.appendChild(div);
+  });
+}
+// 🔍 Autocomplete
+function filtrarOpciones(input, index, tipo) {
+  const valor = input.value.toLowerCase();
+  const lista = tipo === "proveedor" ? proveedores : conceptos;
+
+  const resultados = lista.filter(item =>
+    item.toLowerCase().includes(valor)
+  );
+
+  const contenedor = document.getElementById(`sug-${tipo}-${index}`);
+  contenedor.innerHTML = "";
+
+  if (resultados.length === 0) {
+    contenedor.innerHTML = "<div>No encontrado</div>";
+    return;
+  }
+
+  resultados.forEach(item => {
+    const div = document.createElement("div");
+    div.innerText = item;
+
+    div.onclick = () => {
+      gastos[index][tipo] = item;
+      render();
+    };
+
+    contenedor.appendChild(div);
+  });
+
+  gastos[index][tipo] = input.value;
+}
+
+// 🔹 Render
+function render() {
+  const contenedor = document.getElementById("gastos");
+  contenedor.innerHTML = "";
+
+  gastos.forEach((gasto, index) => {
+    contenedor.innerHTML += `
+      <div class="gasto">
+
+        <div class="autocomplete">
+          <input 
+            placeholder="Proveedor"
+            value="${gasto.proveedor}"
+            oninput="filtrarOpciones(this, ${index}, 'proveedor')"
+            onfocus="mostrarTodasOpciones(this, ${index}, 'proveedor')"
+          >
+          <div class="sugerencias" id="sug-proveedor-${index}"></div>
+        </div>
+
+        <div class="autocomplete">
+          <input 
+            placeholder="Concepto"
+            value="${gasto.concepto}"
+            oninput="filtrarOpciones(this, ${index}, 'concepto')"
+            onfocus="mostrarTodasOpciones(this, ${index}, 'concepto')"
+          >
+          <div class="sugerencias" id="sug-concepto-${index}"></div>
+        </div>
+
+        <input 
+          type="text"
+          inputmode="numeric"
+          placeholder="Valor"
+          value="${gasto.valor ? formatearCOP(gasto.valor) : ''}"
+          oninput="formatearInput(this, ${index})"
+        >
+
+        <button class="delete-btn" onclick="limpiarGasto(${index})">
+          Limpiar
+        </button>
+      </div>
+    `;
+  });
+
+  renderTotal();
+}
+
+
+
+//Esta es para los recudos
+function agregarRecudo() {
+  if (recaudos.length === 0) {
+    recaudos.push({
+      nequi: "",
+      daviplata: "",
+      efectivo: "",
+      moneda: "",
+      caja: ""
+    });
+  }
+  renderRecudos();
+}
+
+function actualizarRecaudo(index, campo, valor, input) {
+  let limpio = valor.replace(/\D/g, "");
+  recaudos[index][campo] = limpio;
+
+  input.value = formatearCOP(limpio);
+
+  renderTotalRecaudos(); // ✔ solo actualiza total
+}
+function limpiarRecaudo(index) {
+  recaudos[index] = {
+    nequi: "",
+    daviplata: "",
+    efectivo: "",
+    moneda: "",
+    caja: ""
+  };
+  renderRecudos();
+}
+function calcularTotalRecaudos() {
+  return recaudos.reduce((sum, r) => {
+    return sum +
+      (parseFloat(r.nequi) || 0) +
+      (parseFloat(r.daviplata) || 0) +
+      (parseFloat(r.efectivo) || 0) +
+      (parseFloat(r.moneda) || 0) +
+      (parseFloat(r.caja) || 0);
+  }, 0);
+}
+
+function renderTotalRecaudos() {
+  document.getElementById("total-recaudos").innerText =
+    formatearCOP(calcularTotalRecaudos());
+}
+function renderRecudos() {
+  const contenedor = document.getElementById("recaudos");
+  contenedor.innerHTML = "";
+
+  if (recaudos.length === 0) return;
+
+  recaudos.forEach((r, index) => {
+    contenedor.innerHTML += `
+      <div class="recaudos">
+        <div class= campo-recaudo>
+            <span class="tipo-recaudo">NEQUI: </span>
+            <input 
+            inputmode="numeric"
+            placeholder="Nequi"
+            value="${r.nequi ? formatearCOP(r.nequi) : ''}"
+            oninput="actualizarRecaudo(${index}, 'nequi', this.value, this)"
+            >
+        </div>
+        <div class= campo-recaudo>
+            <span class="tipo-recaudo">DAVIPLATA: </span>
+            <input 
+            inputmode="numeric"
+            placeholder="Daviplata"
+            value="${r.daviplata ? formatearCOP(r.daviplata) : ''}"
+            oninput="actualizarRecaudo(${index}, 'daviplata', this.value, this)"
+            >
+        </div>
+        <div class= campo-recaudo>
+            <span class="tipo-recaudo">EFECTIVO: </span>
+            <input 
+            inputmode="numeric"
+            placeholder="Efectivo"
+            value="${r.efectivo ? formatearCOP(r.efectivo) : ''}"
+            oninput="actualizarRecaudo(${index}, 'efectivo', this.value, this)"
+            >
+        </div>
+        <div class= campo-recaudo>
+            <span class="tipo-recaudo">MONEDA: </span>
+            <input 
+            inputmode="numeric"
+            placeholder="Moneda"
+            value="${r.moneda ? formatearCOP(r.moneda) : ''}"
+            oninput="actualizarRecaudo(${index}, 'moneda', this.value, this)"
+            >
+        </div>
+        <div class= campo-recaudo>
+            <span class="tipo-recaudo">CAJA: </span>
+            <input 
+            inputmode="numeric"
+            placeholder="Caja"
+            value="${r.caja ? formatearCOP(r.caja) : ''}"
+            oninput="actualizarRecaudo(${index}, 'caja', this.value, this)"
+            >
+        </div>
+        <button class="delete-btn" onclick="limpiarRecaudo(${index})">
+          Limpiar
+        </button>
+
+      </div>
+    `;
+  });
+
+  renderTotalRecaudos();
+}
+
+//Encargada de generar el excel con las hojas de gastos y recaudos
+function descargarExcel() {
+    if (!document.getElementById("fecha").value || !document.getElementById("jornada").value || !document.getElementById("responsable").value) {
+        alert("Faltan datos para poder descargar el excel, por favor completa la fecha, jornada y responsable");
+        return;
+    }
+  const fecha = document.getElementById("fecha").value;
+  const jornada = document.getElementById("jornada").value;
+  const responsable = document.getElementById("responsable").value;
+
+  // — Hoja de Gastos —
+  const filasTitulo = [["FECHA", "JORNADA", "RESPONSABLE", "PROVEEDOR", "CONCEPTO", "TOTAL"]];
+  const filasGastos = gastos
+    .filter(g => g.proveedor || g.concepto || g.valor)
+    .map(g => [fecha, jornada, responsable, g.proveedor, g.concepto, parseFloat(g.valor) || 0]);
+
+  const hojaGastos = XLSX.utils.aoa_to_sheet([...filasTitulo, ...filasGastos]);
+
+  // Ancho de columnas
+  hojaGastos["!cols"] = [
+    { wch: 14 }, { wch: 10 }, { wch: 40 }, { wch: 25 }, { wch: 14 }
+  ];
+
+  // — Hoja de Recaudos —
+  const tituloRecaudos = [["FECHA", "JORNADA", "NEQUI", "DAVIPLATA", "EFECTIVO", "MONEDA", "CAJA", "TOTAL"]];
+  const filasRecaudos = recaudos.map(r => {
+    const nequi    = parseFloat(r.nequi)    || 0;
+    const daviplata= parseFloat(r.daviplata)|| 0;
+    const efectivo = parseFloat(r.efectivo) || 0;
+    const moneda   = parseFloat(r.moneda)   || 0;
+    const caja     = parseFloat(r.caja)     || 0;
+    const total    = nequi + daviplata + efectivo + moneda + caja;
+    return [fecha, jornada, nequi, daviplata, efectivo, moneda, caja, total];
+  });
+
+  const hojaRecaudos = XLSX.utils.aoa_to_sheet([...tituloRecaudos, ...filasRecaudos]);
+  hojaRecaudos["!cols"] = [
+    { wch: 14 }, { wch: 10 }, { wch: 14 }, { wch: 14 },
+    { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }
+  ];
+
+  // — Crear libro y descargar —
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, hojaGastos, "Gastos");
+  XLSX.utils.book_append_sheet(wb, hojaRecaudos, "Recaudos");
+
+  const nombreArchivo = `PANADERIA_${fecha}_${jornada}.xlsx`;
+  localStorage.removeItem("gastos_panaderia");
+  gastos   = [{ proveedor: "", concepto: "", valor: "" }];
+  recaudos = [];
+  setFechaHoy();  
+  render();
+  renderRecudos();
+  XLSX.writeFile(wb, nombreArchivo);
+  
+}
+
+
+
+//Parte de localstorage
+
+function guardarEnLocal() {
+  localStorage.setItem("gastos_panaderia", JSON.stringify({
+    fecha: document.getElementById("fecha").value,
+    jornada: document.getElementById("jornada").value,
+    gastos,
+    recaudos
+  }));
+}
+
+function cargarDesdeLocal() {
+  const data = localStorage.getItem("gastos_panaderia");
+  if (!data) return false;
+  const guardado = JSON.parse(data);
+  gastos   = guardado.gastos   || [];
+  recaudos = guardado.recaudos || [];
+  document.getElementById("fecha").value   = guardado.fecha   || new Date().toISOString().split("T")[0];
+  document.getElementById("jornada").value = guardado.jornada || "AM";
+  return true;
+}
+// Inicial
+setFechaHoy();
+
+if (!cargarDesdeLocal()) {
+  agregarGasto(); // solo si no había nada guardado
+} else {
+  render();
+  renderRecudos();
+}
+</script>
+
+</body>
+</html>
