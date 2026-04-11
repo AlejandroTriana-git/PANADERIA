@@ -424,6 +424,7 @@ function renderTotalRecaudos() {
   document.getElementById("total-recaudos").innerText =
     formatearCOP(calcularTotalRecaudos());
 }
+
 function renderRecudos() {
   const contenedor = document.getElementById("recaudos");
   contenedor.innerHTML = "";
@@ -536,17 +537,23 @@ function descargarExcel() {
   XLSX.utils.book_append_sheet(wb, hojaRecaudos, "Recaudos");
 
   const nombreArchivo = `PANADERIA_${fecha}_${jornada}.xlsx`;
+  resetear(); // Limpiar datos después de descargar
+  XLSX.writeFile(wb, nombreArchivo);
+  
+}
+
+//Volver a original luego de descargar
+function resetear() {
   localStorage.removeItem("gastos_panaderia");
   gastos   = [{ proveedor: "", concepto: "", valor: "" }];
   recaudos = [];
   setFechaHoy();  
   render();
   renderRecudos();
-  XLSX.writeFile(wb, nombreArchivo);
-  
+  renderTotalRecaudos();
+  document.getElementById("jornada").value = "";
+  document.getElementById("responsable").value = "";
 }
-
-
 
 //Parte de localstorage
 
