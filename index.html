@@ -15,7 +15,7 @@
   <img src="logo.png" alt="Logo" class="logo-panaderia">
 
   <label>Fecha</label>
-  <input type="date" id="fecha" onchange="guardarEnLocal()">
+  <input type="date" id="fecha" onchange="guardarEnLocal()" class="fecha-input">
 
   <label>Jornada</label>
   <select id="jornada" onchange="guardarEnLocal()">
@@ -342,7 +342,7 @@ function render() {
   gastos.forEach((gasto, index) => {
     contenedor.innerHTML += `
       <div class="gasto">
-
+        <button class="delete-btn" onclick="eliminarGasto(${index})">✕</button>
         <div class="autocomplete">
           <input 
             placeholder="Proveedor"
@@ -371,7 +371,7 @@ function render() {
           oninput="formatearInput(this, ${index})"
         >
 
-        <button class="delete-btn" onclick="limpiarGasto(${index})">
+        <button class="clean-btn" onclick="limpiarGasto(${index})">
           Limpiar
         </button>
       </div>
@@ -488,7 +488,7 @@ function renderRecudos() {
             oninput="actualizarRecaudo(${index}, 'caja', this.value, this)"
             >
         </div>
-        <button class="delete-btn" onclick="limpiarRecaudo(${index})">
+        <button class="clean-btn" onclick="limpiarRecaudo(${index})">
           Limpiar
         </button>
 
@@ -584,6 +584,27 @@ function cargarDesdeLocal() {
   document.getElementById("fecha").value   = guardado.fecha   || new Date().toISOString().split("T")[0];
   document.getElementById("jornada").value = guardado.jornada || "AM";
   return true;
+}
+
+//Nueva funcion para que cuando me equivoco, borrar el gasto
+function eliminarGasto(index) {
+  const gasto = gastos[index];
+  const estaVacio = !gasto.proveedor && !gasto.concepto && !gasto.valor;
+  if (estaVacio) {
+    if (gastos.length === 1) { limpiarGasto(index); return; }
+    gastos.splice(index, 1);
+    render();
+    guardarEnLocal();
+    return;
+  }
+  // Si tiene datos, pide confirmación
+  const confirmado = confirm("¿Seguro que quieres eliminar este gasto?");
+  if (!confirmado) return; // canceló — no hace nada
+
+  if (gastos.length === 1) { limpiarGasto(index); return; }
+  gastos.splice(index, 1);
+  render();
+  guardarEnLocal();
 }
 // Inicial
 setFechaHoy();
