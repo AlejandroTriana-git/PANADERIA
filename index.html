@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gastos Panadería</title>
-  <link rel="stylesheet" href="styles.css?V3">
+  <link rel="stylesheet" href="styles.css?V4">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 
@@ -51,6 +51,10 @@
   </div>
   <div class="total">
     Total recaudos: $<span id="total-recaudos">0</span>
+  </div>
+
+  <div class="total">
+    Total Venta: $<span id="total-venta">0</span>
   </div>
   
   <button class="add-btn-descarga" onclick="descargarExcel()">Descargar Excel</button>
@@ -249,6 +253,7 @@ function formatearInput(input, index) {
   gastos[index].valor = valor;
   input.value = formatearCOP(valor);
   renderTotal();
+  renderTotalVenta()
   guardarEnLocal(); 
 }
 
@@ -407,12 +412,14 @@ function actualizarRecaudo(index, campo, valor, input) {
   if (limpio === "-" || limpio === "") {
     input.value = limpio;
     renderTotalRecaudos();
+    renderTotalVenta()
     guardarEnLocal();
     return;
   }
 
   input.value = formatearCOP(limpio);
   renderTotalRecaudos();
+  renderTotalVenta()
   guardarEnLocal();
 }
 
@@ -442,6 +449,8 @@ function renderTotalRecaudos() {
   document.getElementById("total-recaudos").innerText =
     formatearCOP(calcularTotalRecaudos());
 }
+
+
 
 function renderRecudos() {
   const contenedor = document.getElementById("recaudos");
@@ -533,15 +542,18 @@ function descargarExcel() {
   ];
 
   // — Hoja de Recaudos —
-  const tituloRecaudos = [["FECHA", "JORNADA", "NEQUI", "DAVIPLATA", "EFECTIVO", "MONEDA", "CAJA", "TOTAL"]];
+  const tituloRecaudos = [["FECHA", "JORNADA", "GASTO", "NEQUI", "DAVIPLATA", "EFECTIVO", "MONEDA", "CAJA",  "TOTAL_RECAUDO", "VENTA"]];
   const filasRecaudos = recaudos.map(r => {
     const nequi    = parseFloat(r.nequi)    || 0;
     const daviplata= parseFloat(r.daviplata)|| 0;
     const efectivo = parseFloat(r.efectivo) || 0;
     const moneda   = parseFloat(r.moneda)   || 0;
     const caja     = parseFloat(r.caja)     || 0;
+    const gasto    = calcularTotal() || 0;
     const total    = nequi + daviplata + efectivo + moneda + caja;
-    return [fecha, jornada, nequi, daviplata, efectivo, moneda, caja, total];
+    const venta    = calcularTotalVenta() || 0;
+
+    return [fecha, jornada, gasto, nequi, daviplata, efectivo, moneda, caja,  total, venta];
   });
 
   const hojaRecaudos = XLSX.utils.aoa_to_sheet([...tituloRecaudos, ...filasRecaudos]);
@@ -570,6 +582,7 @@ function resetear() {
   render();
   renderRecudos();
   renderTotalRecaudos();
+  renderTotalVenta()
   document.getElementById("jornada").value = "";
   document.getElementById("responsable").value = "";
 }
@@ -580,6 +593,7 @@ function guardarEnLocal() {
   localStorage.setItem("gastos_panaderia", JSON.stringify({
     fecha: document.getElementById("fecha").value,
     jornada: document.getElementById("jornada").value,
+    responsable: document.getElementById("responsable").value,
     gastos,
     recaudos
   }));
@@ -593,6 +607,7 @@ function cargarDesdeLocal() {
   recaudos = guardado.recaudos || [];
   document.getElementById("fecha").value   = guardado.fecha   || new Date().toISOString().split("T")[0];
   document.getElementById("jornada").value = guardado.jornada || "AM";
+  document.getElementById("responsable").value = guardado.responsable || "";
   return true;
 }
 
@@ -616,6 +631,26 @@ function eliminarGasto(index) {
   render();
   guardarEnLocal();
 }
+
+
+//Para el total de la venta
+function calcularTotalVenta() {
+  const gasto = calcularTotal();
+  const recaudo = recaudos.reduce((sum, r) => {
+     return sum +
+      (parseFloat(r.nequi) || 0) +
+      (parseFloat(r.daviplata) || 0) +
+      (parseFloat(r.efectivo) || 0) +
+      (parseFloat(r.moneda) || 0) +
+      (parseFloat(r.caja) || 0);
+  }, 0);
+  return gasto + recaudo;
+}
+
+function renderTotalVenta() {
+  document.getElementById("total-venta").innerText =
+    formatearCOP(calcularTotalVenta());
+}
 // Inicial
 setFechaHoy();
 
@@ -624,6 +659,7 @@ if (!cargarDesdeLocal()) {
 } else {
   render();
   renderRecudos();
+  renderTotalVenta();
 }
 </script>
 
