@@ -397,16 +397,25 @@ function agregarRecudo() {
   }
   renderRecudos();
 }
-
 function actualizarRecaudo(index, campo, valor, input) {
-  let limpio = valor.replace(/\D/g, "");
+  // Permite solo números, y el signo - únicamente al inicio
+  let limpio = valor.replace(/[^0-9-]/g, "").replace(/(?!^)-/g, "");
+
   recaudos[index][campo] = limpio;
 
-  input.value = formatearCOP(limpio);
+  // Si es solo "-" o está vacío, no formatear — dejar el input como está
+  if (limpio === "-" || limpio === "") {
+    input.value = limpio;
+    renderTotalRecaudos();
+    guardarEnLocal();
+    return;
+  }
 
-  renderTotalRecaudos(); //  solo actualiza total
-  guardarEnLocal(); 
+  input.value = formatearCOP(limpio);
+  renderTotalRecaudos();
+  guardarEnLocal();
 }
+
 function limpiarRecaudo(index) {
   recaudos[index] = {
     nequi: "",
@@ -482,7 +491,8 @@ function renderRecudos() {
         <div class= campo-recaudo>
             <span class="tipo-recaudo">CAJA: </span>
             <input 
-            inputmode="numeric"
+            
+            inputmode="text"
             placeholder="Caja"
             value="${r.caja ? formatearCOP(r.caja) : ''}"
             oninput="actualizarRecaudo(${index}, 'caja', this.value, this)"
