@@ -6,14 +6,15 @@
     }
     .logo-panaderia {
       display: block;
-      margin: 0 auto 20px auto;
-      width: 150px;
+      margin: 0 auto 0 auto;
+      width: 230px;
+      height: 230px;
     }
 
     .container {
       max-width: 500px;
       margin: auto;
-      background: white;
+      background: #ddc694;
       padding: 15px;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
