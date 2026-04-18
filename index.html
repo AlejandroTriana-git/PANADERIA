@@ -4,16 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gastos Panadería</title>
-  <link rel="stylesheet" href="styles.css?V4">
+  <link rel="stylesheet" href="styles.css?V5">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 
 <body>
 
 <div class="container">
+  <div class="head">
+    <img src="logo-panaderia (1).png" alt="Logo" class="logo-panaderia">
+    <span>V.2</span>
+  </div>
   
-  <img src="logo-panaderia (1).png" alt="Logo" class="logo-panaderia">
-
+  
   <label>Fecha</label>
   <input type="date" id="fecha" onchange="guardarEnLocal()" class="fecha-input">
 
@@ -45,6 +48,12 @@
 
   </div>
   
+  <div class="separador">
+    <div id="venta"></div>
+    <button class="add-btn-3" onclick="agregarVenta()">+ Agregar venta tirilla</button>
+
+  </div>
+  
 
   <div class="total">
     Total gastos: $<span id="total">0</span>
@@ -53,10 +62,16 @@
     Total recaudos: $<span id="total-recaudos">0</span>
   </div>
 
+  
+  
+
   <div class="total">
     Total Venta: $<span id="total-venta">0</span>
   </div>
-  
+
+  <div class="total">
+    Total Venta tirilla: $<span id="total-venta-tirilla">0</span>
+  </div>
   <button class="add-btn-descarga" onclick="descargarExcel()">Descargar Excel</button>
   
 </div>
@@ -189,23 +204,17 @@ const proveedores = [
 ];
 
 const conceptos = [
-    "1-ALIMENTACIÓN",
-    "2-AREPAS Y EMPANADAS",
-    "3-ASEO Y MANTENIMIENTO",
-    "4-CAFETERIA",
-    "5-DESECHABLES",
-    "6-GASTOS FIJOS",
-    "7-INSUMOS",
-    "8-LECHE",
-    "9-LEGALES",
-    "10-TAMALES",
-    "11-TIENDA",
-    "12-GASTOS DE PERSONAL",
-    "13-VARIOS"
+    "1-PANADERIA",
+    "2-CAFETERIA",
+    "3-TIENDA",
+    "4-ASEO",
+    "5-GASTOS DE PERSONAL",
+    "6-GASTOS FIJOS"
 ];
 
 let gastos = [];
 let recaudos = [];
+let ventas = [];
 
 // 🔹 Fecha automática
 function setFechaHoy() {
@@ -224,6 +233,8 @@ function agregarGasto() {
   }  
   
 }
+
+//🔹 Agregar un recudo
 function agregarRecudo() {
   if (recaudos){
     renderRecudos();
@@ -233,6 +244,12 @@ function agregarRecudo() {
   }  
   
   
+}
+//Agregar una venta de tirilla
+function agregarVenta() {
+  ventas.push({ panaderia: "", cafeteria: "", tienda: "", otros: "" });
+  renderVenta();
+  guardarEnLocal(); 
 }
 
 // 🔹 Limpiar gasto
@@ -518,6 +535,82 @@ function renderRecudos() {
   renderTotalRecaudos();
 }
 
+function renderVenta() {
+  const contenedor = document.getElementById("venta");
+  contenedor.innerHTML = "";
+
+  if (ventas.length === 0) return;
+
+  ventas.forEach((v, index) => {
+    contenedor.innerHTML += `
+      <div class="venta">
+        <div class= campo-recaudo>
+            <span class="tipo-recaudo">1-PANADERIA: </span>
+            <input 
+            inputmode="numeric"
+            placeholder="Panaderia"
+            value="${v.panaderia ? formatearCOP(v.panaderia) : ''}"
+            oninput="actualizarVenta(${index}, 'panaderia', this.value, this)"
+            >
+        </div>
+        <div class= campo-recaudo>
+            <span class="tipo-recaudo">2-CAFETERIA: </span>
+            <input 
+            inputmode="numeric"
+            placeholder="Cafeteria"
+            value="${v.cafeteria ? formatearCOP(v.cafeteria) : ''}"
+            oninput="actualizarVenta(${index}, 'cafeteria', this.value, this)"
+            >
+        </div>
+        <div class= campo-recaudo>
+            <span class="tipo-recaudo">3-TIENDA: </span>
+            <input 
+            inputmode="numeric"
+            placeholder="Tienda"
+            value="${v.tienda ? formatearCOP(v.tienda) : ''}"
+            oninput="actualizarVenta(${index}, 'tienda', this.value, this)"
+            >
+        </div>
+        <div class= campo-recaudo>
+            <span class="tipo-recaudo">4-OTROS: </span>
+            <input 
+            inputmode="numeric"
+            placeholder="Otros"
+            value="${v.otros ? formatearCOP(v.otros) : ''}"
+            oninput="actualizarVenta(${index}, 'otros', this.value, this)"
+            >
+        </div>
+        
+        <button class="clean-btn" onclick="limpiarVenta(${index})">
+          Limpiar
+        </button>
+
+      </div>
+    `;
+  });
+
+  
+}
+
+// 🔹 Actualizar venta
+function actualizarVenta(index, campo, valor, input) {
+  let numValor = valor.replace(/\D/g, "");
+  ventas[index][campo] = numValor;
+  input.value = formatearCOP(numValor);
+  renderTotalVentaTirilla();
+  renderTotalVenta();
+  guardarEnLocal();
+}
+
+// 🔹 Limpiar venta
+function limpiarVenta(index) {
+  ventas[index] = { panaderia: "", cafeteria: "", tienda: "", otros: "" };
+  renderVenta();
+  renderTotalVentaTirilla();
+  renderTotalVenta();
+  guardarEnLocal();
+}
+
 //Encargada de generar el excel con las hojas de gastos y recaudos
 function descargarExcel() {
     if (!document.getElementById("fecha").value || !document.getElementById("jornada").value || !document.getElementById("responsable").value) {
@@ -542,7 +635,14 @@ function descargarExcel() {
   ];
 
   // — Hoja de Recaudos —
-  const tituloRecaudos = [["FECHA", "JORNADA", "GASTO", "NEQUI", "DAVIPLATA", "EFECTIVO", "MONEDA", "CAJA",  "TOTAL_RECAUDO", "VENTA"]];
+  const tituloRecaudos = [["FECHA", "JORNADA", "RESPONSABLE", "TOTAL_GASTO","NEQUI", "DAVIPLATA", "EFECTIVO", "MONEDA", "CAJA", "PANADERIA", "CAFETERIA", "TIENDA", "OTROS",  "TOTAL_RECAUDO",  "TOTAL_VENTA", "TOTAL_TIRILLA",]];
+  const totalesVenta = ventas.reduce((sum, v) => ({
+    panaderia: sum.panaderia + (parseFloat(v.panaderia) || 0),
+    cafeteria: sum.cafeteria + (parseFloat(v.cafeteria) || 0),
+    tienda: sum.tienda + (parseFloat(v.tienda) || 0),
+    otros: sum.otros + (parseFloat(v.otros) || 0)
+  }), { panaderia: 0, cafeteria: 0, tienda: 0, otros: 0 });
+
   const filasRecaudos = recaudos.map(r => {
     const nequi    = parseFloat(r.nequi)    || 0;
     const daviplata= parseFloat(r.daviplata)|| 0;
@@ -550,22 +650,25 @@ function descargarExcel() {
     const moneda   = parseFloat(r.moneda)   || 0;
     const caja     = parseFloat(r.caja)     || 0;
     const gasto    = calcularTotal() || 0;
-    const total    = nequi + daviplata + efectivo + moneda + caja;
-    const venta    = calcularTotalVenta() || 0;
+    const total_recaudo = nequi + daviplata + efectivo + moneda + caja;
+    const total_tirilla = totalesVenta.panaderia + totalesVenta.cafeteria + totalesVenta.tienda + totalesVenta.otros;
+    const venta    = gasto + total_recaudo ;
 
-    return [fecha, jornada, gasto, nequi, daviplata, efectivo, moneda, caja,  total, venta];
+    return [fecha, jornada, responsable,  gasto, nequi, daviplata, efectivo, moneda, caja, totalesVenta.panaderia, totalesVenta.cafeteria, totalesVenta.tienda, totalesVenta.otros, total_recaudo,  venta, total_tirilla,];
   });
 
-  const hojaRecaudos = XLSX.utils.aoa_to_sheet([...tituloRecaudos, ...filasRecaudos]);
-  hojaRecaudos["!cols"] = [
+  const hojaRecaudos_Venta = XLSX.utils.aoa_to_sheet([...tituloRecaudos, ...filasRecaudos]);
+  hojaRecaudos_Venta["!cols"] = [
     { wch: 14 }, { wch: 10 }, { wch: 14 }, { wch: 14 },
+    { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 },
+    { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 },
     { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }
   ];
 
   // — Crear libro y descargar —
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, hojaGastos, "Gastos");
-  XLSX.utils.book_append_sheet(wb, hojaRecaudos, "Recaudos");
+  XLSX.utils.book_append_sheet(wb, hojaRecaudos_Venta, "Recaudos");
 
   const nombreArchivo = `PANADERIA_${fecha}_${jornada}.xlsx`;
   resetear(); // Limpiar datos después de descargar
@@ -578,10 +681,13 @@ function resetear() {
   localStorage.removeItem("gastos_panaderia");
   gastos   = [{ proveedor: "", concepto: "", valor: "" }];
   recaudos = [];
+  ventas   = [];
   setFechaHoy();  
   render();
   renderRecudos();
+  renderVenta();
   renderTotalRecaudos();
+  renderTotalVentaTirilla();
   renderTotalVenta()
   document.getElementById("jornada").value = "";
   document.getElementById("responsable").value = "";
@@ -595,7 +701,8 @@ function guardarEnLocal() {
     jornada: document.getElementById("jornada").value,
     responsable: document.getElementById("responsable").value,
     gastos,
-    recaudos
+    recaudos,
+    ventas
   }));
 }
 
@@ -605,6 +712,7 @@ function cargarDesdeLocal() {
   const guardado = JSON.parse(data);
   gastos   = guardado.gastos   || [];
   recaudos = guardado.recaudos || [];
+  ventas   = guardado.ventas   || [];
   document.getElementById("fecha").value   = guardado.fecha   || new Date().toISOString().split("T")[0];
   document.getElementById("jornada").value = guardado.jornada || "AM";
   document.getElementById("responsable").value = guardado.responsable || "";
@@ -651,7 +759,22 @@ function renderTotalVenta() {
   document.getElementById("total-venta").innerText =
     formatearCOP(calcularTotalVenta());
 }
-// Inicial
+
+//Para el total de la venta tirilla
+function calcularTotalVentaTirilla() {
+  return ventas.reduce((sum, v) => {
+    return sum +
+      (parseFloat(v.panaderia) || 0) +
+      (parseFloat(v.cafeteria) || 0) +
+      (parseFloat(v.tienda) || 0) +
+      (parseFloat(v.otros) || 0);
+  }, 0);
+}
+
+function renderTotalVentaTirilla() {
+  document.getElementById("total-venta-tirilla").innerText =
+    formatearCOP(calcularTotalVentaTirilla());
+}
 setFechaHoy();
 
 if (!cargarDesdeLocal()) {
@@ -659,6 +782,8 @@ if (!cargarDesdeLocal()) {
 } else {
   render();
   renderRecudos();
+  renderVenta();
+  renderTotalVentaTirilla();
   renderTotalVenta();
 }
 </script>
