@@ -263,7 +263,9 @@ function agregarVenta() {
 function limpiarGasto(index) {
   gastos[index] = { proveedor: "", concepto: "", valor: "" };
   render();
+  renderTotalVenta();
   guardarEnLocal(); 
+  
 }
 
 // 🔹 Formato COP
@@ -456,7 +458,8 @@ function limpiarRecaudo(index) {
     caja: ""
   };
   renderRecudos();
-  guardarEnLocal(); 
+  guardarEnLocal();
+  renderTotalVenta(); 
 }
 function calcularTotalRecaudos() {
   return recaudos.reduce((sum, r) => {
